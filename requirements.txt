@@ -1,0 +1,13 @@
+Crypto
+flask
+Flask-SQLAlchemy
+Flask-Restless
+Flask-SocketIO
+Flask-Marshmallow
+Flask-Login
+eventlet
+Pycryptodome
+Werkzeug
+socketIO-client
+psycopg2
+python-jose
