@@ -39,7 +39,34 @@ class UserFarm(db.Model):
     def serialize(self):
         return {
             'pub_id': self.pub_id,
-            'lux': self.lux
+            'pri_id': self.pri_id,
+            'time_sam': self.time_sam.strftime("%m/%d/%Y, %H:%M:%S"),
+            'time_con': self.time_con.strftime("%m/%d/%Y, %H:%M:%S"),
+            'lux': self.lux,
+            'timeled_open_h': self.timeled_close_h,
+            'timeled_open_m': self.timeled_open_m,
+            'timeled_close_h': self.timeled_close_h,
+            'timeled_close_m': self.timeled_close_m,
+            'timedoor_open_h': self.timedoor_open_h,
+            'timedoor_open_m': self.timedoor_open_m,
+            'timedoor_close_h': self.timedoor_close_h,
+            'timedoor_close_m': self.timedoor_close_m,
+            'timenest_open_h': self.timenest_open_h,
+            'timenest_open_m': self.timenest_open_m,
+            'timenest_close_h': self.timenest_close_h,
+            'timenest_close_m': self.timenest_close_m,
+            'timeksr_open_h': self.timeksr_open_h,
+            'timeksr_open_m': self.timeksr_open_m,
+            'timeksr_close_h': self.timeksr_close_h,
+            'timeksr_close_m': self.timeksr_close_m,
+            'timeonfly_open_h': self.timeonfly_open_h,
+            'timeonfly_open_m': self.timeonfly_open_m,
+            'timeonfly_close_h': self.timeonfly_close_h,
+            'timeonfly_close_m': self.timeonfly_close_m,
+            'a_lux': self.a_lux,
+            'a_hysteresis': self.a_hysteresis,
+            'b_lux': self.b_lux,
+            'b_hysteresis': self.b_hysteresis
         }
 
 class Session(db.Model):
@@ -54,8 +81,8 @@ class Session(db.Model):
     time_end = db.Column('time_end', db.DateTime, nullable=True)
 
 class UserDevice(UserMixin, db.Model):
-    _tablename_ = 'UserDevice'
-    user_id = db.Column('user_id', db.Integer, primary_key=True)
+    __tablename__ = 'userdevice'
+    id = db.Column('user_id', db.Integer, primary_key=True)
     username = db.Column('username', db.String(100), unique=True)
     password = db.Column('password', db.String(100)) #crypt
 
@@ -73,7 +100,10 @@ class Motor(db.Model):
         return {
             'motor_id': self.motor_id,
             'farm_id': self.farm_id,
-            'addresses': self.addresses
+            'addresses': self.addresses,
+            'numbers': self.numbers,
+            'time_ready': self.time_ready,
+            'active': self.active
         }
 
 class Led(db.Model):
@@ -93,12 +123,19 @@ class Led(db.Model):
         return {
             'led_id': self.led_id,
             'farm_id': self.farm_id,
-            'addresses': self.addresses
+            'addresses': self.addresses,
+            'numbers': self.numbers,
+            'max_value': self.max_value,
+            'dim_up_delay': self.dim_up_delay,
+            'dim_down_delay': self.dim_down_delay,
+            'dim_time': self.dim_time,
+            'active': self.active
         }
 
 class Change(db.Model):
     _tablename_ = 'change'
     #add the id of UserDevice
+    #user_id = db.Column('user_id', db.Integer, db.ForeignKey('userdevice.pub_id'))
     change_id = db.Column('change_id', db.String(100), primary_key=True, autoincrement=True)
     farm_id = db.Column('farm_id', db.String(100), db.ForeignKey('userfarm.pub_id'))
     code = db.Column('code', db.String(20))

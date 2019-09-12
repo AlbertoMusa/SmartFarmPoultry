@@ -77,7 +77,7 @@ CREATE TABLE Change(
 CREATE TABLE Session(
     session_id varchar(100) null unique,
     pub_id varchar(100) not null,
-    key varchar(100) not null,
+    key varchar(400) not null,
 	sid varchar(100) null,
 	otp varchar(100) not null primary key,
 	flag boolean not null,
@@ -91,7 +91,7 @@ VALUES ( 'a', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.aWRwcml2YXRv.7fygGrObBYuD6P9
 ( 'b', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.cGFyb2xh.qAR8yz13LEZhQ3YpAfDP2UByVT4mQZKXM0nIdXGyLlE');
 
 INSERT INTO UserDevice ( user_id, username, password)
-VALUES ( 1, 'username', 'clientPsw');
+VALUES ( 1, 'username', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.Y2xpZW50UHN3.kdUiGdXjeA3xVoIVggTj8lycNFBcZIbXXMrr20Y9QiU');
 
 INSERT INTO Motor ( motor_id, farm_id)
 VALUES ( 1, 'a'),( 2, 'a'),( 3, 'a'),( 4, 'a'),( 5, 'a'),( 6, 'a'),( 7, 'a'),( 1, 'b'),( 2, 'b'),( 3, 'b'),( 4, 'b'),( 5, 'b'),( 6, 'b'),( 7, 'b');

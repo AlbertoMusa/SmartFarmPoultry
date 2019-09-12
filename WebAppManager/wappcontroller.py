@@ -1,183 +1,104 @@
-from flask import Flask, request
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user
-import json
-from werkzeug.security import check_password_hash
-import datetime
+from flask import Flask, render_template, redirect, url_for
+from flask_bootstrap import Bootstrap
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, BooleanField
+from wtforms.validators import InputRequired, Length
+from jose import jws
+from flask_login import LoginManager, login_user, login_required, logout_user
+
+from Db.models import db
+from Db.models import UserDevice
+from Db.models import UserFarm
+from Db.models import Session
+from Db.models import Motor
+from Db.models import Led
+from Db.models import Change
 
 app = Flask(__name__)
-
+app.config['SECRET_KEY'] = 'secret'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/SmartFarmPoultry'
-db = SQLAlchemy(app)
-
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:1234@localhost/SmartFarmPoultry'
+bootstrap = Bootstrap(app)
+db.init_app(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-class UserFarm(db.Model):
-    _tablename_ = 'UserFarm'
-    pub_id = db.Column('pub_id', db.String(100), primary_key=True)
-    pri_id = db.Column('pri_id', db.String(100), unique=True) #crypt
-    time_sam = db.Column('time_sam', db.DateTime)
-    time_con = db.Column('time_con', db.DateTime)
-    lux = db.Column('time', db.Integer)
-    timeled_open = db.Column('timeled_open', db.DateTime)
-    timeled_close = db.Column('timeled_close', db.DateTime)
-    timedoor_open = db.Column('timedoor_open', db.DateTime)
-    timedoor_close = db.Column('timedoor_close', db.DateTime)
-    timenest_open = db.Column('timenest_open', db.DateTime)
-    timenest_close = db.Column('timenest_close', db.DateTime)
-    timeksr_open = db.Column('timeksr_open', db.DateTime)
-    timeksr_close = db.Column('timeksr_close', db.DateTime)
-    timeonfly_open = db.Column('timeonfly_open', db.DateTime)
-    timeonfly_close = db.Column('timeonfly_close', db.DateTime)
-    a_lux = db.Column('a_lux', db.Integer)
-    a_hysteresis = db.Column('a_hysteresis', db.Integer)
-    b_lux = db.Column('b_lux', db.Integer)
-    b_hysteresis = db.Column('b_hysteresis', db.Integer)
-
-    @property
-    def serialize(self):
-        return {
-            'pub_id': self.pub_id,
-            'lux': self.lux
-            # continue...
-        }
-
-class UserDevice(UserMixin, db.Model):
-    _tablename_ = 'UserDevice'
-    user_id = db.Column('user_id', db.Integer, primary_key=True)
-    username = db.Column('username', db.String(100), unique=True)
-    password = db.Column('password', db.String(100)) #crypt
-
-class Motor(db.Model):
-    _tablename_ = 'Motor'
-    motor_id = db.Column('motor_id', db.Integer, primary_key=True) #1-7
-    farm_id = db.Column('farm_id', db.String(100), db.ForeignKey('UserFarm.pub_id'))
-    addresses = db.Column('addresses', db.String(20))
-    numbers = db.Column('numbers', db.String(10))
-    time_ready = db.Column('time_ready', db.Integer)
-    active = db.Column('active', db.Boolean)
-
-    @property
-    def serialize(self):
-        return {
-            'motor_id': self.motor_id,
-            'farm_id': self.farm_id,
-            'addresses': self.addresses
-        }
-
-class Led(db.Model):
-    _tablename_ = 'Led'
-    led_id = db.Column('led_id', db.Integer, primary_key=True) #1-6
-    farm_id = db.Column('farm_id', db.String(100), db.ForeignKey('UserFarm.pub_id'))
-    addresses = db.Column('addresses', db.String(20))
-    numbers = db.Column('numbers', db.String(10))
-    max_value = db.Column('max_value', db.Integer)
-    dim_up_delay = db.Column('dim_up_delay', db.Integer)
-    dim_down_delay = db.Column('dim_down_delay', db.Integer)
-    dim_time = db.Column('dim_time', db.Integer)
-    active = db.Column('active', db.Boolean)
-
-    @property
-    def serialize(self):
-        return {
-            'led_id': self.led_id,
-            'farm_id': self.farm_id,
-            'addresses': self.addresses
-        }
-
-class Change(db.Model):
-    _tablename_ = 'Change'
-    change_id = db.Column('change_id', db.String(100), primary_key=True, autoincrement=True)
-    farm_id = db.Column('farm_id', db.String(100), db.ForeignKey('UserFarm.pub_id'))
-    code = db.Column('code', db.String(10))
-    val = db.Column('val', db.String(10))
-    time_req = db.Column('time_req', db.DateTime)
-    flag = db.Column('flag', db.Boolean, default=False)
+key = "key_encode"
+mot_con = ["flapLeftFront", "flapLeftBack", "flapRightFront", "flapRightBack", "nestEject", "flapKsr", "onFlyPole"]
+le_con = ["LEDTop", "LEDMid", "LEDBottom", "LEDNest", "LEDKsr", "LEDAlways"]
 
 @login_manager.user_loader
 def load_user(user_id):
-    return UserDevice.query.get(user_id)
+    return UserDevice.query.get(int(user_id))
 
-@app.route('/login')
+class LoginForm(FlaskForm):
+    username = StringField('username', validators=[InputRequired(), Length(min=4, max=15)])
+    password = PasswordField('password', validators=[InputRequired(), Length(min=8, max=80)])
+    remember = BooleanField('remember me')
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    auth = request.authorization
-    prec = UserDevice.query.filter_by(username=auth.username)
-    if prec is None:
-        return 1
-    if check_password_hash(prec.password, auth.password):
-        db.session.commit()
-        login_user(prec)
-        return 0
-    return 2
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = UserDevice.query.filter_by(username=form.username.data).first()
+        if user:
+            if jws.verify(user.password, key, algorithms=['HS256']).decode() == form.password.data:
+                login_user(user, remember=form.remember.data)
+                return redirect(url_for('dashboard'))
+        return render_template('index.html', data="Invalid username or password")
+    return render_template('login.html', form=form)
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    farms = UserFarm.query.all() #.order_by(Change.time_req.asc(), )
+    data = []
+    for farm in farms:
+        if Session.query.filter_by(pub_id=farm.pub_id, flag=True).first() is not None:
+            flag = True
+        else:
+            flag = False
+        if farm.time_sam > farm.time_con:
+            time = farm.time_sam
+        else:
+            time = farm.time_con
+        data.append({'id': farm.pub_id, 'active': flag, 'last_update': time.strftime("%m/%d/%Y, %H:%M:%S")})
+    return render_template('dashboard.html', data=data)
+
+@app.route('/farm_<cod>')
+@login_required
+def farm(cod):
+    data = []
+    farm = UserFarm.query.filter_by(pub_id=cod).first()
+    motors = Motor.query.filter_by(farm_id=cod).all()
+    leds = Led.query.filter_by(farm_id=cod).all()
+    data.append(farm.serialize)
+    i = 0
+    for motor in motors:
+        data.append(motor.serialize)
+        data[i+1]['name'] = mot_con[i]
+        i = i+1
+    i = 0
+    for led in leds:
+        data.append(led.serialize)
+        data[i + 8]['name'] = le_con[i]
+        i = i + 1
+    print(data)
+    return render_template('farm.html', data=data)
 
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
+    return redirect(url_for('index'))
 
-@app.route('/getFarms')
-@login_required
-def get_farms():
-    farms = UserFarm.query.with_entities(UserFarm.pub_id).all()
-    data = []
-    for element in farms:
-        data.append({id: element.pub_id})
-    jsondata=json.dumps(data)
-    return jsondata
-
-@app.route('/getLeds')
-@login_required
-def get_leds():
-    req = request.get_json()
-    leds = Led.query.filter_by(farm_id=req['id']).with_entities(Led.led_id).all()
-    data = []
-    for element in leds:
-        data.append({id: element.led_id})
-    jsondata = json.dumps(data)
-    return jsondata
-
-@app.route('/getMotors')
-@login_required
-def get_motors():
-    req = request.get_json()
-    motors = Motor.query.filter_by(farm_id=req['id']).with_entities(Motor.motor_id).all()
-    data = []
-    for element in motors:
-        data.append({id: element.led_id})
-    jsondata = json.dumps(data)
-    return jsondata
-
-@app.route('/getFarm')
-@login_required
-def get_farm():
-    req = request.get_json()
-    farm = UserFarm.query.filter_by(pub_id=req['id'])
-    return farm.serialize
-
-@app.route('/getLed')
-@login_required
-def get_led():
-    req = request.get_json()
-    led = Led.query.filter_by(farm_id=req['farm_id'], led_id=req['led_id'])
-    return led.serialize
-
-@app.route('/getMotor')
-@login_required
-def get_motor():
-    req = request.get_json()
-    motor = Motor.query.filter_by(farm_id=req['farm_id'], motor_id=req['motor_id'])
-    return motor.serialize
-
-@app.route('/setChange')
-@login_required
-def set_led():
-    req = request.get_json()
-    ch = Change(farm_id=req['farm_id'], code=req['code'], value=req['value'], time=datetime.datetime.utcnow)
-    db.session.add(ch)
-    db.session.commit()
-    return 0
+#def main():
+    #app.run(debug=True, host='127.0.0.1', port=5001)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='127.0.0.1', port=5001)
+    #main()

@@ -11,3 +11,7 @@ Werkzeug
 socketIO-client
 psycopg2
 python-jose
+
+flask-bootstrap
+flask-wtf
+wtforms

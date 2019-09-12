@@ -152,9 +152,9 @@ configurationDict = {
         }
     }
 
-test = "parola"
-priv ="password"
+test = "clientPsw"
+priv ="key_encode"
 signed = jws.sign(test.encode(), priv, algorithm='HS256')
 print(signed)
-data = jws.verify(signed, priv, algorithms=['HS256'])
-print(data)
+data = jws.verify(signed, priv, algorithms=['HS256'])#, verify=True)
+print(data.decode())

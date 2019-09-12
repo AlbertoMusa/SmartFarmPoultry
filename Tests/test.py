@@ -30,9 +30,3 @@ def get_user():
     print(user.id)
     #return '<h1>The user is located in: </h1>'
     return f'<h1>The user is located in: {user.id} </h1>'
-
-    # try:
-    #    UserFarm.query.filter_by(pub_id=req['pub_id'])
-    #    print('SI')
-    # except:
-    #    print('NO')         db.session.rollback()

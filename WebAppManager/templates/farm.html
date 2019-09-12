@@ -1,0 +1,192 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+Farm
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='dashboard.css')}}">
+{% endblock %}
+
+{% block content %}
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand">Smart Farm Poultry</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="#">Settings</a></li>
+            <li><a href="#">Profile</a></li>
+            <li><a href="{{ url_for('logout') }}">Log Out</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+            <li class="active"><a href="{{ url_for('dashboard') }}">Dashboard <span class="sr-only">(current)</span></a></li>
+            <li><a href="#">Changes</a></li>
+          </ul>
+          <ul class="nav nav-sidebar">
+            <li><a href="{{ url_for('history') }}">History<span class="sr-only">(current)</span></a></li>
+          </ul>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <h2 class="sub-header">Farm: {{cod}}</h2>
+            <div class="table-responsive">
+            {% if data != 1 %}
+
+            <form class="form-change" method="POST" action="farm_{{cod}}">
+                {{ form.hidden_tag() }}
+
+                <table class="table table-striped">
+                    <tbody>
+                    <tr>
+                        <th>time sampleDict:</th>
+                        <td>{{data[0]['time_sam']}}</td>
+                    </tr>
+                    <tr>
+                        <th>time configurationDict:</th>
+                        <td>{{data[0]['time_con']}}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ wtf.form_field(form.lux) }}</th>
+                        <td>{{data[0]['lux']}}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ wtf.form_field(form.time_open_led) }}</th>
+                        <td>{{data[0]['timeled_open_h']}}:{{data[0]['timeled_open_m']}}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ wtf.form_field(form.time_close_led) }}</th>
+                        <td>{{data[0]['timeled_close_h']}}:{{data[0]['timeled_close_m']}}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ wtf.form_field(form.time_open_door) }}</th>
+                        <td>{{data[0]['timedoor_open_h']}}:{{data[0]['timedoor_open_m']}}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ wtf.form_field(form.time_close_door) }}</th>
+                        <td>{{data[0]['timedoor_close_h']}}:{{data[0]['timedoor_close_m']}}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ wtf.form_field(form.time_open_nest) }}</th>
+                        <td>{{data[0]['timenest_open_h']}}:{{data[0]['timenest_open_m']}}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ wtf.form_field(form.time_close_nest) }}</th>
+                        <td>{{data[0]['timenest_close_h']}}:{{data[0]['timenest_close_m']}}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ wtf.form_field(form.time_open_ksr) }}</th>
+                        <td>{{data[0]['timeksr_open_h']}}:{{data[0]['timenksr_open_m']}}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ wtf.form_field(form.time_close_ksr) }}</th>
+                        <td>{{data[0]['timeksr_close_h']}}:{{data[0]['timeksr_close_m']}}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ wtf.form_field(form.time_open_fly) }}</th>
+                        <td>{{data[0]['timeonfly_open_h']}}:{{data[0]['timeonfly_open_m']}}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ wtf.form_field(form.time_close_fly) }}</th>
+                        <td>{{data[0]['timeonfly_close_h']}}:{{data[0]['timeonfly_close_m']}}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ wtf.form_field(form.close_door_lux) }}</th>
+                        <td>{{data[0]['a_lux']}}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ wtf.form_field(form.close_door_hysteresis) }}</th>
+                        <td>{{data[0]['a_hysteresis']}}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ wtf.form_field(form.led_off_lux) }}</th>
+                        <td>{{data[0]['b_lux']}}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ wtf.form_field(form.led_of_hysteresis) }}</th>
+                        <td>{{data[0]['b_hysteresis']}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+                {% for i in range(1,8) %}
+                    <h3 class="sub-header">{{data[i]['name']}}:</h3>
+                    <table class="table table-striped">
+                        <tbody>
+                        <tr>
+                            <th>addresses:</th>
+                            <td>{{data[i]['addresses']}}</td>
+                        </tr>
+                        <tr>
+                            <th>numbers:</th>
+                            <td>{{data[i]['numbers']}}</td>
+                        </tr>
+                        <tr>
+                            <th>time ready:</th>
+                            <td>{{data[i]['time_ready']}}</td>
+                        </tr>
+                        <tr>
+                            <th>active:</th>
+                            <td>{{data[i]['active']}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                {% endfor %}
+                {% for i in range(8,14) %}
+                    <h3 class="sub-header">{{data[i]['name']}}:</h3>
+                    <table class="table table-striped">
+                        <tbody>
+                        <tr>
+
+                        </tr>
+                        <tr>
+                            <th>addresses:</th>
+                            <td>{{data[i]['addresses']}}</td>
+                        </tr>
+                        <tr>
+                            <th>numbers:</th>
+                            <td>{{data[i]['numbers']}}</td>
+                        </tr>
+                        <tr>
+                            <th>max value:</th>
+                            <td>{{data[i]['max_value']}}</td>
+                        </tr>
+                        <tr>
+                            <th>dim up delay:</th>
+                            <td>{{data[i]['dim_up_delay']}}</td>
+                        </tr>
+                        <tr>
+                            <th>dim down delay:</th>
+                            <td>{{data[i]['dim_down_delay']}}</td>
+                        </tr>
+                        <tr>
+                            <th>dim time:</th>
+                            <td>{{data[i]['dim_time']}}</td>
+                        </tr>
+                        <tr>
+                            <th>active:</th>
+                            <td>{{data[i]['active']}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                {% endfor %}
+
+            <button class="btn btn-lg btn-primary btn-block" type="submit">Commit</button>
+            </form>
+
+            {% else %}
+                <h4> &emsp; NO ELEMENTS</h4>
+            {% endif %}
+            </div>
+        </div>
+      </div>
+    </div>
+{% endblock %}
