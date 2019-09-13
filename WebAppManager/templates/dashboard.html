@@ -27,7 +27,7 @@ Dashboard
 
     <div class="container-fluid">
       <div class="row">
-        <div class="col-sm-3 col-md-2 sidebar">
+        <div class="col-sm-3 col-md-2"> <!-- sidebar"> -->
           <ul class="nav nav-sidebar">
             <li class="active"><a href="{{ url_for('dashboard') }}">Dashboard <span class="sr-only">(current)</span></a></li>
             <li><a href="#">Changes</a></li>
@@ -51,7 +51,7 @@ Dashboard
               <tbody>
                 {% for row in data %}
                     <tr>
-                        <td><a href="/farm_{{row['id']}}">{{row['id']}}</a></td>
+                        <td><a href="/farm/{{row['id']}}/{{0}}">{{row['id']}}</a></td>
                         <td>{{row['active']}}</td>
                         <td>{{row['last_update']}}</td>
                     </tr>

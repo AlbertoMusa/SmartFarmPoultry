@@ -51,8 +51,8 @@ Farm Histry
               <tbody>
                 {% for row in data %}
                     <tr>
-                        <td><a href="/history_{{id}}{{n - loop.index + 1}}">{{row['time1']}} {{n - loop.index}}</a></td>
-                        <td><a href="/history_{{id}}{{n - loop.index + 1}}">{{row['time2']}}</a></td>
+                        <td><a href="/history/{{id}}/{{n - loop.index + 1}}">{{row['time1']}} {{n - loop.index}}</a></td>
+                        <td><a href="/history/{{id}}/{{n - loop.index + 1}}">{{row['time2']}}</a></td>
                     </tr>
                 {% endfor %}
               </tbody>

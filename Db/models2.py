@@ -209,11 +209,10 @@ class Led(db.Model):
 
 class Change(db.Model):
     _tablename_ = 'change'
-    #add the id of UserDevice
-    #user_id = db.Column('user_id', db.Integer, db.ForeignKey('userdevice.pub_id'))
-    change_id = db.Column('change_id', db.String(100), primary_key=True, autoincrement=True)
-    pub_id = db.Column('pub_id', db.String(100), db.ForeignKey('userfarm.pub_id'))
-    code = db.Column('code', db.String(20))
+    user_id = db.Column('user_id', db.Integer, db.ForeignKey('userdevice.user_id'), primary_key=True)
+    pub_id = db.Column('pub_id', db.String(100), db.ForeignKey('userfarm.pub_id'), primary_key=True)
+    dev = db.Column('dev', db.Integer)
+    code = db.Column('code', db.Integer)
     val = db.Column('val', db.String(20))
-    time_req = db.Column('time_req', db.DateTime)
+    time_req = db.Column('time_req', db.DateTime, primary_key=True)
     flag = db.Column('flag', db.Boolean, default=False)

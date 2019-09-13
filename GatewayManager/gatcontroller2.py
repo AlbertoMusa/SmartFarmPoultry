@@ -62,7 +62,7 @@ def check_changes(db):
                 app2 = UserFarm.query.filter_by(pub_id=app1.pub_id).first()
                 if Session.query.filter_by(pub_id=app1.pub_id, flag=True).first() is not None:
                     app3 = Session.query.filter_by(pub_id=app1.pub_id, flag=True).first()
-                    data = {"ses_id": app3.session_id, 'code': app1.code, 'val': app1.val, "ch_id": app1.change_id}
+                    data = {"ses_id": app3.session_id, 'dev': app1.dev, 'code': app1.code, 'val': app1.val, 'time_req': app1.time_req.strftime("%m/%d/%Y, %H:%M:%S.%f")}
                     print("TH-data: ", data) if deb else None
                     crypt_data = jws.sign(data, jws.verify(app2.pri_id, priv_id, algorithms=['HS256']).decode(), algorithm='HS256')
                     print("TH-encrypt data: ", crypt_data) if deb else None
@@ -71,7 +71,7 @@ def check_changes(db):
                     req = {"pub_id": app2.pub_id, "data": crypt_data, "sign": sign_crypt_data.decode()}
                     print("TH-send: ", req) if deb else None
                     emit('changes', req, room=app3.sid)
-                    print("TH CHECK CHANGE ---> user: ", app2.pub_id, "  ch_id: ", app1.change_id) if deb2 else None
+                    print("TH CHECK CHANGE ---> user: ", app2.pub_id) if deb2 else None
         print("----------------------------------th restart loop----------------------------------") if deb2 else None
         time.sleep(5)
     print("----------------------------------finish thread----------------------------------") if deb2 else None
@@ -97,10 +97,10 @@ def change_confirm(req):
             app2 = Session.query.filter_by(session_id=req_data['ses_id'], pub_id=req['pub_id'], flag=True).first()
             if sign.verify_sign(app2.key, req['sign'], req['data']):
                 print("valid sign") if deb else None
-                canc = Change.query.filter_by(flag=False, change_id=req_data['ch_id'], pub_id=req['pub_id']).order_by(Change.time_req.asc()).first()
+                canc = Change.query.filter_by(flag=False, time_req=datetime.datetime.strptime(req_data['time_req'], "%m/%d/%Y, %H:%M:%S.%f"), pub_id=req['pub_id']).order_by(Change.time_req.asc()).first()
                 canc.flag = True
                 db.session.commit()
-                print("TH CHANGE CONF ---> user: ", app1.pub_id, "  ch_id: ", req_data['ch_id']) if deb2 else None
+                print("TH CHANGE CONF ---> user: ", app1.pub_id) if deb2 else None
                 print("----------------------------------change confirm DONE----------------------------------") if deb2 else None
 
 #------------------------------------------ ROUTES ------------------------------------------
@@ -181,10 +181,10 @@ def connect_confirm(req):
                     print("----------------------------------connect_confirm DONE----------------------------------") if deb2 else None
                     emit('connect_estab', res2)
 
-                    #global thread
-                    #if thread is None:
-                        #thread = threading.Thread(target=check_changes(db))
-                        #thread.start()
+                    global thread
+                    if thread is None:
+                        thread = threading.Thread(target=check_changes(db))
+                        thread.start()
 
                 else:
                     emit('connect_estab', 4)

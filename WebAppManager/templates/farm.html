@@ -28,7 +28,7 @@ Farm
 
     <div class="container-fluid">
       <div class="row">
-        <div class="col-sm-3 col-md-2 sidebar">
+        <div class="col-sm-3 col-md-2">  <!-- sidebar"> -->
           <ul class="nav nav-sidebar">
             <li class="active"><a href="{{ url_for('dashboard') }}">Dashboard <span class="sr-only">(current)</span></a></li>
             <li><a href="#">Changes</a></li>
@@ -37,12 +37,12 @@ Farm
             <li><a href="{{ url_for('history') }}">History<span class="sr-only">(current)</span></a></li>
           </ul>
         </div>
+
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
             <h2 class="sub-header">Farm: {{cod}}</h2>
             <div class="table-responsive">
             {% if data != 1 %}
-
-            <form class="form-change" method="POST" action="farm_{{cod}}">
+            <form class="form-change" method="POST" action="/farm/{{cod}}/{{0}}">
                 {{ form.hidden_tag() }}
 
                 <table class="table table-striped">
@@ -117,75 +117,79 @@ Farm
                     </tr>
                     </tbody>
                 </table>
+            <button class="btn btn-lg btn-primary btn-block" type="submit">Commit</button>
+            </form>
                 {% for i in range(1,8) %}
                     <h3 class="sub-header">{{data[i]['name']}}:</h3>
-                    <table class="table table-striped">
-                        <tbody>
-                        <tr>
-                            <th>addresses:</th>
-                            <td>{{data[i]['addresses']}}</td>
-                        </tr>
-                        <tr>
-                            <th>numbers:</th>
-                            <td>{{data[i]['numbers']}}</td>
-                        </tr>
-                        <tr>
-                            <th>time ready:</th>
-                            <td>{{data[i]['time_ready']}}</td>
-                        </tr>
-                        <tr>
-                            <th>active:</th>
-                            <td>{{data[i]['active']}}</td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <form class="form-change" method="POST" action="/farm/{{cod}}/{{i}}">
+                        {{ formM.hidden_tag() }}
+                        <table class="table table-striped">
+                            <tbody>
+                            <tr>
+                                <th>{{ wtf.form_field(formM.addresses) }}</th>
+                                <td>{{data[i]['addresses']}}</td>
+                            </tr>
+                            <tr>
+                                <th>{{ wtf.form_field(formM.numbers) }}</th>
+                                <td>{{data[i]['numbers']}}</td>
+                            </tr>
+                            <tr>
+                                <th>{{ wtf.form_field(formM.time_ready) }}</th>
+                                <td>{{data[i]['time_ready']}}</td>
+                            </tr>
+                            <tr>
+                                <th>{{ wtf.form_field(formM.active) }}</th>
+                                <td>{{data[i]['active']}}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <button class="btn btn-lg btn-primary btn-block" type="submit">Commit</button>
+                    </form>
                 {% endfor %}
                 {% for i in range(8,14) %}
                     <h3 class="sub-header">{{data[i]['name']}}:</h3>
+                    <form class="form-change" method="POST" action="/farm/{{cod}}/{{i}}">
+                        {{ formL.hidden_tag() }}
                     <table class="table table-striped">
                         <tbody>
                         <tr>
-
-                        </tr>
-                        <tr>
-                            <th>addresses:</th>
+                            <th>{{ wtf.form_field(formL.addresses) }}</th>
                             <td>{{data[i]['addresses']}}</td>
                         </tr>
                         <tr>
-                            <th>numbers:</th>
+                            <th>{{ wtf.form_field(formL.numbers) }}</th>
                             <td>{{data[i]['numbers']}}</td>
                         </tr>
                         <tr>
-                            <th>max value:</th>
+                            <th>{{ wtf.form_field(formL.max_value) }}</th>
                             <td>{{data[i]['max_value']}}</td>
                         </tr>
                         <tr>
-                            <th>dim up delay:</th>
+                            <th>{{ wtf.form_field(formL.dim_up_delay) }}</th>
                             <td>{{data[i]['dim_up_delay']}}</td>
                         </tr>
                         <tr>
-                            <th>dim down delay:</th>
+                            <th>{{ wtf.form_field(formL.dim_down_delay) }}</th>
                             <td>{{data[i]['dim_down_delay']}}</td>
                         </tr>
                         <tr>
-                            <th>dim time:</th>
+                            <th>{{ wtf.form_field(formL.dim_time) }}</th>
                             <td>{{data[i]['dim_time']}}</td>
                         </tr>
                         <tr>
-                            <th>active:</th>
+                            <th>{{ wtf.form_field(formL.active) }}</th>
                             <td>{{data[i]['active']}}</td>
                         </tr>
                         </tbody>
                     </table>
+                    <button class="btn btn-lg btn-primary btn-block" type="submit">Commit</button>
+                    </form>
                 {% endfor %}
-
-            <button class="btn btn-lg btn-primary btn-block" type="submit">Commit</button>
-            </form>
-
             {% else %}
                 <h4> &emsp; NO ELEMENTS</h4>
             {% endif %}
             </div>
+
         </div>
       </div>
     </div>

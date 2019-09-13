@@ -92,9 +92,9 @@ def on_changes(*resp):
     print("decrypt data response: ", resp_data) if deb else None
     print("key in data response: ", server_key) if deb else None
     if sign.verify_sign(server_key, resp[0]['sign'], resp[0]['data']):
-        # se fa qua in teoria devo aggiornare dati
+        # update new data
         print("valid sign") if deb else None
-        req_data = {"ses_id": session_id, "ch_id": resp_data['ch_id']}
+        req_data = {"ses_id": session_id, "time_req": resp_data['time_req']}
         print("data to send: ", req_data) if deb else None
         crypt_data = jws.sign(req_data, pri_id, algorithm='HS256')
         print("encrypt data to send: ", crypt_data) if deb else None

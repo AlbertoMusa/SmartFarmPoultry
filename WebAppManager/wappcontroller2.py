@@ -4,7 +4,8 @@ from flask_wtf import FlaskForm
 import wtforms
 from wtforms.validators import InputRequired, Length, NumberRange, Optional
 from jose import jws
-from flask_login import LoginManager, login_user, login_required, logout_user
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+import datetime
 
 from Db.models2 import db
 from Db.models2 import UserDevice
@@ -54,6 +55,21 @@ class ChangeForm(FlaskForm):
     led_off_lux = wtforms.IntegerField('led off lux:', validators=[Optional(), NumberRange(min=0)])
     led_of_hysteresis = wtforms.IntegerField('led off hysteresis:', validators=[Optional(), NumberRange(min=0)])
 
+class ChangeMotorForm(FlaskForm):
+    addresses = wtforms.TimeField('addresses:', validators=[Optional()])
+    numbers = wtforms.TimeField('numbers:', validators=[Optional()])
+    time_ready = wtforms.IntegerField('time ready:', validators=[Optional(), NumberRange(min=0)])
+    active = wtforms.BooleanField('active:')
+
+class ChangeLedForm(FlaskForm):
+    addresses = wtforms.TimeField('addresses:', validators=[Optional()])
+    numbers = wtforms.TimeField('numbers:', validators=[Optional()])
+    max_value = wtforms.IntegerField('max value:', validators=[Optional(), NumberRange(min=0)])
+    dim_up_delay = wtforms.IntegerField('time ready:', validators=[Optional(), NumberRange(min=0)])
+    dim_down_delay = wtforms.IntegerField('dim up delay:', validators=[Optional(), NumberRange(min=0)])
+    dim_time = wtforms.IntegerField('dim up delay:', validators=[Optional(), NumberRange(min=0)])
+    active = wtforms.BooleanField('active')
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -93,14 +109,54 @@ def dashboard():
         data.append({'id': f.pub_id, 'active': flag, 'last_update': time})
     return render_template('dashboard.html', data=data)
 
-@app.route('/farm_<cod>', methods=['GET', 'POST'])
+@app.route('/farm/<cod>/<i>', methods=['GET', 'POST'])
 @login_required
-def farm(cod):
+def farm(cod, i):
     data = []
     form = ChangeForm()
-    if form.validate_on_submit():
-        print(form.close_door_hysteresis.data)
-        print(form.time_open_door.data)
+    formL = ChangeLedForm()
+    formM = ChangeMotorForm()
+    if form.validate_on_submit() and int(i) == 0:
+        j = 0
+        for field in form:
+            if field.data != None:
+                print(j)
+                print(field.data)
+                try:
+                    add = Change(user_id=current_user.id, pub_id=cod, dev=i, code=j, val=field.data, time_req=datetime.datetime.utcnow(), flag=False)
+                    db.session.add(add)
+                    db.session.commit()
+                except:
+                    pass
+            j = j + 1
+        return redirect(url_for('dashboard'))
+    if formL.validate_on_submit() and int(i) > 0 and int(i) < 8:
+        j = 0
+        for field in formL:
+            if field.data != None:
+                print(j)
+                print(field.data)
+                try:
+                    add = Change(user_id=current_user.id, pub_id=cod, dev=i, code=j, val=field.data, time_req=datetime.datetime.utcnow(), flag=False)
+                    db.session.add(add)
+                    db.session.commit()
+                except:
+                    pass
+            j = j + 1
+        return redirect(url_for('dashboard'))
+    if formM.validate_on_submit() and int(i) >= 8:
+        j = 0
+        for field in formM:
+            if field.data != None:
+                print(j)
+                print(field.data)
+                try:
+                    add = Change(user_id=current_user.id, pub_id=cod, dev=i, code=j, val=field.data, time_req=datetime.datetime.utcnow(), flag=False)
+                    db.session.add(add)
+                    db.session.commit()
+                except:
+                    pass
+            j = j + 1
         return redirect(url_for('dashboard'))
     if Farm.query.filter_by(pub_id=cod).order_by(Farm.time_sam.desc(), Farm.time_con.desc()).first() is not None:
         farm = Farm.query.filter_by(pub_id=cod).order_by(Farm.time_sam.desc(), Farm.time_con.desc()).first()
@@ -119,7 +175,7 @@ def farm(cod):
             i = i + 1
     else:
         data = 1
-    return render_template('farm.html', data=data, cod=cod, form=form)
+    return render_template('farm.html', data=data, cod=cod, form=form, formM=formM, formL=formL)
 
 @app.route('/history')
 @login_required
@@ -144,7 +200,7 @@ def history():
         data.append({'id': f.pub_id, 'active': flag, 'last_update': time})
     return render_template('history.html', data=data)
 
-@app.route('/history_<cod>')
+@app.route('/history/<cod>')
 @login_required
 def history_farms(cod):
     data = []
@@ -164,7 +220,7 @@ def history_farms(cod):
         data = 1
     return render_template('farm_history.html', data=data, id=cod, n=n)
 
-@app.route('/history_<cod><n>')
+@app.route('/history/<cod>/<n>')
 @login_required
 def history_farm(cod, n):
     data = []

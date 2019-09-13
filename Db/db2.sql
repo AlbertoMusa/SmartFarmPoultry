@@ -78,14 +78,23 @@ CREATE TABLE Led(
 );
 
 CREATE TABLE Change(
-    change_id int not null primary key,
+    user_id int not null,
     pub_id varchar(100) not null,
-    code varchar(20) not null,
+    dev int not null,
+    code int not null,
 	val varchar(20) not null,
-	time_req time not null,
+	time_req timestamp not null,
 	flag boolean not null default FALSE,
-	FOREIGN KEY (pub_id) REFERENCES UserFarm(pub_id)
+	FOREIGN KEY (user_id) REFERENCES UserDevice(user_id),
+	FOREIGN KEY (pub_id) REFERENCES UserFarm(pub_id),
+	PRIMARY KEY (user_id, pub_id, time_req)
 );
+
+dev = db.Column('dev', db.Integer(20))
+    code = db.Column('code', db.Integer(20))
+    val = db.Column('val', db.String(20))
+    time_req = db.Column('time_req', db.DateTime, primary_key=True)
+    flag = db.Column('flag', db.Boolean, default=False)
 
 CREATE TABLE Session(
     session_id varchar(100) null unique,
@@ -106,13 +115,13 @@ VALUES ( 'a', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.aWRwcml2YXRv.7fygGrObBYuD6P9
 INSERT INTO UserDevice ( user_id, username, password)
 VALUES ( 1, 'username', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.Y2xpZW50UHN3.kdUiGdXjeA3xVoIVggTj8lycNFBcZIbXXMrr20Y9QiU');
 
-INSERT INTO Change ( change_id, pub_id, code, val, time_req, flag)
-VALUES ( 1, 'a', 'first', '160', NOW(), False),
-( 2, 'a', 'second', 'ok', NOW(), False),
-( 3, 'b', 'third', '160', NOW(), False),
-( 4, 'a', 'fourth', 'ok', NOW(), False),
-( 5, 'b', 'fiveth', '160', NOW(), False),
-( 6, 'a', 'sixth', 'ok', NOW(), False);
+INSERT INTO Change ( user_id, pub_id, dev, code, val, time_req, flag)
+VALUES ( 1, 'a', 0, 1, '160', NOW(), False),
+( 1, 'a', 1, 1, 'ok', NOW(), False),
+( 1, 'b', 2, 2, '160', NOW(), False),
+( 1, 'a', 3, 3, 'ok', NOW(), False),
+( 1, 'b', 7, 5, '160', NOW(), False),
+( 1, 'a', 13, 3, 'ok', NOW(), False);
 
 SELECT * FROM Session;
 DELETE FROM Session;
